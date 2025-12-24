@@ -3,23 +3,21 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { getBool, setBool } from "@/lib/storage";
 
-const FIRST_OPEN_KEY = "rr_first_open_done";
+const FIRST_OPEN_KEY = "rr_first_opened";
 
 export default function ClientGate() {
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // Prima apertura: redirect forzato su /xmas + banner Buon Natale
-    const already = getBool(FIRST_OPEN_KEY, false);
+    const already = localStorage.getItem(FIRST_OPEN_KEY);
     if (!already) {
-      setBool(FIRST_OPEN_KEY, true);
+      localStorage.setItem(FIRST_OPEN_KEY, "1");
       if (pathname !== "/xmas") router.replace("/xmas?first=1");
-      return;
     }
   }, [pathname, router]);
 
   return null;
 }
+

@@ -1,59 +1,47 @@
-// PATH: lib/themes.ts
-export type SceneId = "rain" | "ocean" | "asmr" | "soft" | "xmas";
+export const SCENES = [
+  { id: "rain", label: "Rain", subtitle: "Pioggia sul vetro" },
+  { id: "ocean", label: "Ocean", subtitle: "Onde lente" },
+  { id: "asmr", label: "ASMR", subtitle: "Suoni morbidi" },
+  { id: "soft", label: "Soft", subtitle: "Fondo caldo" },
+  { id: "xmas", label: "Xmas", subtitle: "Atmosfera natalizia" },
+] as const;
+
+export type SceneId = (typeof SCENES)[number]["id"];
 
 export type Theme = {
-  bg1: [number, number, number];
-  bg2: [number, number, number];
-  bg3: [number, number, number];
-  glow1: [number, number, number];
-  glow2: [number, number, number];
+  bg1: string;
+  bg2: string;
+  bg3: string;
+  glow1: string;
+  glow2: string;
 };
 
 export const THEMES: Record<SceneId, Theme> = {
-  rain: {
-    bg1: [15, 23, 42],
-    bg2: [30, 41, 59],
-    bg3: [51, 65, 85],
-    glow1: [245, 158, 11],
-    glow2: [236, 72, 153],
-  },
-  ocean: {
-    bg1: [2, 44, 34],
-    bg2: [6, 78, 59],
-    bg3: [15, 118, 110],
-    glow1: [34, 211, 238],
-    glow2: [16, 185, 129],
-  },
-  asmr: {
-    bg1: [46, 16, 101],
-    bg2: [76, 29, 149],
-    bg3: [109, 40, 217],
-    glow1: [217, 70, 239],
-    glow2: [168, 85, 247],
-  },
-  soft: {
-    bg1: [43, 31, 31],
-    bg2: [75, 46, 46],
-    bg3: [107, 63, 63],
-    glow1: [251, 191, 36],
-    glow2: [244, 114, 182],
-  },
-  xmas: {
-    bg1: [63, 29, 43],
-    bg2: [127, 29, 29],
-    bg3: [185, 28, 28],
-    glow1: [250, 204, 21],
-    glow2: [34, 197, 94],
-  },
+  rain: { bg1: "10 14 24", bg2: "15 23 42", bg3: "30 41 59", glow1: "56 189 248", glow2: "59 130 246" },
+  ocean: { bg1: "6 18 32", bg2: "10 28 48", bg3: "15 45 74", glow1: "34 211 238", glow2: "16 185 129" },
+  asmr: { bg1: "18 12 22", bg2: "31 18 42", bg3: "52 30 74", glow1: "244 114 182", glow2: "167 139 250" },
+  soft: { bg1: "20 16 10", bg2: "32 24 16", bg3: "64 45 24", glow1: "251 191 36", glow2: "244 63 94" },
+  xmas: { bg1: "10 14 22", bg2: "16 24 36", bg3: "24 40 28", glow1: "34 197 94", glow2: "239 68 68" },
 };
 
-export function themeToCssVars(t: Theme) {
-  const rgb = (v: [number, number, number]) => `${v[0]} ${v[1]} ${v[2]}`;
+export function isSceneId(x: string | null): x is SceneId {
+  return !!x && SCENES.some((s) => s.id === x);
+}
+
+export function themeToCssVars(theme: Theme) {
   return {
-    "--bg-1": rgb(t.bg1),
-    "--bg-2": rgb(t.bg2),
-    "--bg-3": rgb(t.bg3),
-    "--glow-1": rgb(t.glow1),
-    "--glow-2": rgb(t.glow2),
-  } as const;
+    "--bg-1": theme.bg1,
+    "--bg-2": theme.bg2,
+    "--bg-3": theme.bg3,
+    "--glow-1": theme.glow1,
+    "--glow-2": theme.glow2,
+  } as Record<string, string>;
+}
+
+export function applyThemeForScene(scene: SceneId) {
+  if (typeof document === "undefined") return;
+  const t = THEMES[scene] ?? THEMES.xmas;
+  const vars = themeToCssVars(t);
+  const root = document.documentElement;
+  for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
 }

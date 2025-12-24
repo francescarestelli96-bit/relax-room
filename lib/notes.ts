@@ -1,46 +1,46 @@
 // PATH: lib/notes.ts
-import { getJson, setJson } from "./storage";
-
 export type Note = {
   id: string;
   title: string;
-  text: string;
+  body: string;
   createdAt: number;
   updatedAt: number;
 };
 
-const NOTES_KEY = "rr_notes";
+const KEY = "rr_notes_v1";
 
-export function listNotes(): Note[] {
-  return getJson<Note[]>(NOTES_KEY, []);
+function uid() {
+  return crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
 }
 
-export function saveNote(input: { id?: string; title: string; text: string }): Note {
-  const now = Date.now();
-  const notes = listNotes();
-
-  if (input.id) {
-    const idx = notes.findIndex((n) => n.id === input.id);
-    if (idx >= 0) {
-      const updated: Note = { ...notes[idx]!, title: input.title, text: input.text, updatedAt: now };
-      notes[idx] = updated;
-      setJson(NOTES_KEY, notes);
-      return updated;
-    }
+export function getNotes(): Note[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || "[]");
+  } catch {
+    return [];
   }
+}
 
-  const created: Note = {
-    id: crypto.randomUUID(),
-    title: input.title.trim() || "Senza titolo",
-    text: input.text,
+export function saveNote(input: { title: string; body: string }) {
+  const notes = getNotes();
+  const now = Date.now();
+
+  const note: Note = {
+    id: uid(),
+    title: input.title || "Senza titolo",
+    body: input.body,
     createdAt: now,
     updatedAt: now,
   };
-  setJson(NOTES_KEY, [created, ...notes]);
-  return created;
+
+  const next = [note, ...notes];
+  localStorage.setItem(KEY, JSON.stringify(next));
+  return next;
 }
 
 export function deleteNote(id: string) {
-  const notes = listNotes().filter((n) => n.id !== id);
-  setJson(NOTES_KEY, notes);
+  const next = getNotes().filter((n) => n.id !== id);
+  localStorage.setItem(KEY, JSON.stringify(next));
+  return next;
 }

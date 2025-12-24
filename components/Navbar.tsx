@@ -4,42 +4,47 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const p = usePathname();
-  const active = p === href;
-  return (
-    <Link
-      href={href}
-      className={[
-        "rounded-2xl px-4 py-2 text-sm border transition",
-        active ? "bg-white/15 border-white/15" : "bg-white/5 border-white/10 hover:bg-white/10",
-      ].join(" ")}
-    >
-      {children}
-    </Link>
-  );
+const items = [
+  { href: "/xmas", label: "Natale" },
+  { href: "/", label: "Stanza relax" },
+  { href: "/images", label: "Immagini" },
+  { href: "/diary", label: "Diario" },
+];
+
+function isActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname.startsWith(href);
 }
 
 export default function Navbar() {
-  return (
-    <div className="sticky top-0 z-40 border-b border-white/10 bg-black/20 backdrop-blur-xl">
-      <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/10 border border-white/10">
-            ✨
-          </span>
-          <div className="leading-tight">
-            <div className="text-sm font-semibold">Relax Room</div>
-            <div className="text-[11px] text-zinc-300/80">piccola, calma, tua</div>
-          </div>
-        </div>
+  const pathname = usePathname();
 
-        <div className="flex items-center gap-2">
-          <NavLink href="/xmas">Natale</NavLink>
-          <NavLink href="/">Stanza relax</NavLink>
-          <NavLink href="/visual">Immagini</NavLink>
-          <NavLink href="/diary">Diario</NavLink>
-        </div>
+  return (
+    <div className="sticky top-0 z-50 border-b border-white/10 bg-black/25 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="rr-chip">✨ Relax Room</span>
+        </Link>
+
+        <nav className="flex items-center gap-1 sm:gap-2">
+          {items.map((it) => {
+            const active = isActive(pathname, it.href);
+            return (
+              <Link
+                key={it.href}
+                href={it.href}
+                className={[
+                  "rounded-xl px-2.5 py-1.5 text-xs sm:text-sm transition ring-1",
+                  active
+                    ? "bg-white/18 text-white ring-white/18"
+                    : "bg-white/8 text-zinc-200/90 ring-white/10 hover:bg-white/12",
+                ].join(" ")}
+              >
+                {it.label}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
